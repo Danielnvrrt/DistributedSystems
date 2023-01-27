@@ -1,53 +1,61 @@
-@Override
-public void run()
+
+public class ReceiverWorker extends Receiver
 {
-  try
-  {
-    message = (Message)readFromNet.readObject();
-  }
   
-  catch (IOException | ClassNotFoundException ex)
+
+
+
+
+  @Override
+  public void run()
   {
-    Logger.getLogger(ReceiverWorker.class.getName()).log(level.SEVERE, "[ReceiverWorker.run] Message could not be read", ex);
+    try
+    {
+      message = (Message)readFromNet.readObject();
+   }
+  
+   catch (IOException | ClassNotFoundException ex)
+    {
+      Logger.getLogger(ReceiverWorker.class.getName()).log(level.SEVERE, "[ReceiverWorker.run] Message could not be read", ex);
     
-    System.exit(1);
-  }
+      System.exit(1);
+   }
   
-  switch (message.getType())
-  {
-    case SHUTDOWN:
-      System.out.println("Received shutdown message from server, exiting");
+    switch (message.getType())
+    {
+      case SHUTDOWN:
+        System.out.println("Received shutdown message from server, exiting");
       
-      try
-      {
-        serverConnection.close();
-      }
-      catch (IOException ex)
-      {
-        //dont care
-      }
+        try
+        {
+          serverConnection.close();
+        }
+       catch (IOException ex)
+       {
+         //dont care
+       }
       
-      System.exit(0);
+       System.exit(0);
       
-      break;
+       break;
       
-    case NOTE:
+     case NOTE:
       
-      System.out.println((String) message.getContent());
+       System.out.println((String) message.getContent());
       
-      try
-      {
-        serverConnection.close();
-      }
-      catch (IOException ex)
-      {
-        Logger.getLogger(ReceiverWorker.class.getName()).log(level.SEVERE, "Command NOTE failed", ex);
-      }
+        try
+        {
+          serverConnection.close();
+        }
+        catch (IOException ex)
+        {
+          Logger.getLogger(ReceiverWorker.class.getName()).log(level.SEVERE, "Command NOTE failed", ex);
+        }
       
-      break;
+       break;
       
-    default:
-      // cannot happen
-    }
-  }
+     default:
+        // cannot happen
+     }
+   }
 }
