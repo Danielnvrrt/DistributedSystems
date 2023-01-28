@@ -1,3 +1,5 @@
+package chat;
+
 @Override
 public void run(){
     NodeInfo participantInfo = null;

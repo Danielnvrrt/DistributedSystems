@@ -2,10 +2,10 @@ package chat;
 
 import java.io.IOException;
 import utils.PropertyHandler;
-import java.utils.Properties;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import util.NetworkUtilities;
+import utils.NetworkUtilities;
 
 /**
 *Chat Client class
