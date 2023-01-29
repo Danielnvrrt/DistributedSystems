@@ -1,14 +1,48 @@
+package chat;
 
-public class ReceiverWorker extends Receiver {
+import java.net.ServerSocket;
+import java.net.SocketException;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+import message.Message;
+import utils.PropertyHandler;
+import message.MessageTypes;
+import java.util.Properties;
+import chat.Sender;
+
+public class ReceiverWorker extends Sender implements MessageTypes{
+	
+	public ReceiverWorker(Socket sock) {
+		ObjectOutputStream writeToNet;
+        ObjectInputStream readFromNet;
+		
+		
+		try
+		{
+			readFromNet = new ObjectInputStream(serverConnection.getInputStream());
+			writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
+		}
+		catch(IOException ex)
+		{
+			Logger.getLogger(ReceiverWorker.class.getName()).log(Level.SEVERE, "[ReceiverWorker.run] Could not open object streams.", ex);
+		}
+	}
 
   @Override
   public void run() {
-    try {
-      message = (Message) readFromNet.readObject();
+	Message message = null;
+	try {
+		ObjectInputStream readFromNet = new ObjectInputStream(serverConnection.getInputStream());
+		message  = (Message) readFromNet.readObject();
     }
 
     catch (IOException | ClassNotFoundException ex) {
-      Logger.getLogger(ReceiverWorker.class.getName()).log(level.SEVERE,
+      Logger.getLogger(ReceiverWorker.class.getName()).log(Level.SEVERE,
           "[ReceiverWorker.run] Message could not be read", ex);
 
       System.exit(1);
@@ -35,7 +69,7 @@ public class ReceiverWorker extends Receiver {
         try {
           serverConnection.close();
         } catch (IOException ex) {
-          Logger.getLogger(ReceiverWorker.class.getName()).log(level.SEVERE, "Command NOTE failed", ex);
+          Logger.getLogger(ReceiverWorker.class.getName()).log(Level.SEVERE, "Command NOTE failed", ex);
         }
 
         break;

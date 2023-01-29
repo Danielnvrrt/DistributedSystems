@@ -1,5 +1,6 @@
 package chat;
 
+
 import java.io.Serializable;
 
 /*
@@ -7,7 +8,7 @@ import java.io.Serializable;
 */
 public class NodeInfo implements Serializable {
 	// declare the variables
-	String adress;
+	String address;
 	int port = 0;
 	String name = null;
 
