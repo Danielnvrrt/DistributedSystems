@@ -1,5 +1,12 @@
 package chat;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.ServerSocket;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class Receiver extends Thread {
   static ServerSocket receiverSocket = null;
   static String userName = null;
@@ -9,7 +16,7 @@ public class Receiver extends Thread {
    */
   public Receiver() {
     try {
-      receiverSocket = new serverSocket(ChatClient.myNodeInfo.getPort());
+      receiverSocket = new ServerSocket(ChatClient.myNodeInfo.getPort());
       System.out
           .println("[Receiver.Receiver] receiver socket created, listening on port " + ChatClient.myNodeInfo.getPort());
     } catch (IOException ex) {
