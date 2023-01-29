@@ -10,16 +10,20 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import message.Message;
+import message.MessageTypes;
 import utils.PropertyHandler;
 import message.MessageTypes;
 import java.util.Properties;
 import chat.Sender;
 
-public class ReceiverWorker extends Sender implements MessageTypes{
-	
+public class ReceiverWorker extends Sender{
+	Socket serverConnection = null;
+    ObjectInputStream readFromNet = null;
+    ObjectOutputStream writeToNet = null;
+
+
 	public ReceiverWorker(Socket sock) {
-		ObjectOutputStream writeToNet;
-        ObjectInputStream readFromNet;
+		this.serverConnection = sock;
 		
 		
 		try
