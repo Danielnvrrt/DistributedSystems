@@ -1,8 +1,10 @@
 package chat;
 
 import java.io.IOException;
+
 import utils.PropertyHandler;
 import java.util.Properties;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import utils.NetworkUtilities;
@@ -52,7 +54,7 @@ public class ChatClient implements Runnable {
 		String myName = properties.getProperty("MY_NAME");
 
 		// check if the name is null, if so then close the program
-		if (myname == null) {
+		if (myName == null) {
 			Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, "Could not read the clients name", ex);
 			System.exit(1);
 		}
