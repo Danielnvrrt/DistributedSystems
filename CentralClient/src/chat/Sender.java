@@ -53,13 +53,11 @@ public class Sender extends Thread implements MessageTypes {
                 // read server information user provided with JOIN command
                 String[] connectivityInfo = inputLine.split("[ ]+");
 
-                // if there is information, that may override the connectivity information
-                // that was provided through the properties
-                try
-                {
-                    ChatClient.serverNodeInfo = new NodeInfo(connectivityInfo[1], Integer.parseInt(connectivityInfo[2]));
-                }
-                catch (ArrayIndexOutOfBoundsException ex)
+                // if thnere is information, that may override the connectivity information // that was provided through the properties 
+                
+                try { 
+                	ChatClient.serverNodeInfo = new NodeInfo(connectivityInfo[1], Integer.parseInt(connectivityInfo[2])); 
+                } catch (ArrayIndexOutOfBoundsException ex)
                 {
                     // don't do anything, we may have defaults
                 }
@@ -233,7 +231,7 @@ public class Sender extends Thread implements MessageTypes {
                     Logger.getLogger(Sender.class.getName()).log(Level.SEVERE, "Sending message error", ex);
                     continue;
                 }
-
+                System.out.println("Sent shutdown all request ... \n");
             }
         }
   
