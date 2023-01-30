@@ -69,6 +69,8 @@ public class Sender extends Thread implements MessageTypes {
                 try
                 {
                     // open connection to server
+                    System.out.println(ChatClient.serverNodeInfo.getAddress());
+                    System.out.println(ChatClient.serverNodeInfo.getPort());
                     serverConnection = new Socket(ChatClient.serverNodeInfo.getAddress(), ChatClient.serverNodeInfo.getPort());
 
                     // open object streams

@@ -11,12 +11,10 @@ public class CreatePropertiesFile {
       //Instantiating the properties file
       Properties props = new Properties();
       //Populating the properties file
-      props.put("MY_PORT", "9999");
-      props.put("MY_NAME", "Fady");
       props.put("SERVER_PORT", "9999");
       props.put("SERVER_IP", NetworkUtilities.getMyIP());
       //Instantiating the FileInputStream for output file
-      String path = "/CentralClient/chat/ChatNodeDefaults.properties";
+      String path = "/home/usuario/Escritorio/DS_Aux/DistributedSystems/CentralServer/config/ServerNodeDefaults.properties";
       FileOutputStream outputStrem = new FileOutputStream(path);
 	//Storing the properties file
       props.store(outputStrem, "This is a sample properties file");

@@ -1,19 +1,41 @@
-import java.io.ObjectOutputStream;
+package chat;
+
+
 import java.util.Iterator;
+import java.net.ServerSocket;
+import java.net.SocketException;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
-import chat.NodeInfo;
 import message.Message;
+import message.MessageTypes;
+import utils.PropertyHandler;
+import message.MessageTypes;
+import java.util.Properties;
+import chat.Sender;
+public class ChatServerWorker extends Thread implements MessageTypes{
 
-public class ChatServerWorker {
+    Socket chatConnection = null;
+    ObjectOutputStream writeToNet = null;
+    ObjectInputStream readFromNet = null;
+
+    public ChatServerWorker(Socket sock){
+        this.chatConnection = sock;
+    }
 
 	@Override
     public void run() {
         NodeInfo participantInfo = null;
-        Iterator<E> <NodeInfo> participantsIterator;
+        Iterator<NodeInfo> participantsIterator;
+        Message message = null;
 
         try{
             // get object streams
-            writeToNet = new ObjectOUtputStream(chatConnection.getOutputStream());
+            writeToNet = new ObjectOutputStream(chatConnection.getOutputStream());
             readFromNet = new ObjectInputStream(chatConnection.getInputStream());
 
             // read message
@@ -23,7 +45,7 @@ public class ChatServerWorker {
         }
         catch (IOException | ClassNotFoundException e)
         {
-            System.out.println("[ChatServerWorker.run] Failed to open object stream");
+            System.out.println("[chat.ChatServerWorker.run] Failed to open object stream");
 
             System.exit(1);
         }
@@ -71,7 +93,7 @@ public class ChatServerWorker {
         
         case SHUTDOWN_ALL:
             // run through all the participants and shut down each single one
-            participantsIterator = ChatServer.participants.iterator;
+            participantsIterator = ChatServer.participants.iterator();
             while (participantsIterator.hasNext())
             {
                 // get next participant
@@ -80,7 +102,7 @@ public class ChatServerWorker {
                 try
                 {
                     // open connection to client
-                    chatConnection = new Socket(participantInfo.adress, participantInfo.port);
+                    chatConnection = new Socket(participantInfo.address, participantInfo.port);
 
                     // open object streams
                     writeToNet = new ObjectOutputStream(chatConnection.getOutputStream());
