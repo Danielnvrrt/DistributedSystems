@@ -22,8 +22,10 @@ public class ChatServerWorker extends Thread implements MessageTypes{
     Socket chatConnection = null;
     ObjectOutputStream writeToNet = null;
     ObjectInputStream readFromNet = null;
+    Message message = null;
 
     public ChatServerWorker(Socket sock){
+        System.out.println("AAAAAAAAAAAAAAA");
         this.chatConnection = sock;
     }
 
@@ -31,7 +33,6 @@ public class ChatServerWorker extends Thread implements MessageTypes{
     public void run() {
         NodeInfo participantInfo = null;
         Iterator<NodeInfo> participantsIterator;
-        Message message = null;
 
         try{
             // get object streams
@@ -40,7 +41,6 @@ public class ChatServerWorker extends Thread implements MessageTypes{
 
             // read message
             message = (Message) readFromNet.readObject();
-
             chatConnection.close();
         }
         catch (IOException | ClassNotFoundException e)
@@ -51,73 +51,73 @@ public class ChatServerWorker extends Thread implements MessageTypes{
         }
 
     //processing message
-    switch (message.getType())
-    {
-        case JOIN:
+        switch (message.getType())
+        {
+            case JOIN:
 
-            // read participant's NodeInfo
-            NodeInfo joiningParticipantNodeInfo = (NodeInfo) message.getContent();
+                // read participant's NodeInfo
+                NodeInfo joiningParticipantNodeInfo = (NodeInfo) message.getContent();
 
-            // add this client to list of participants
-            ChatServer.participants.add(joiningParticipantNodeInfo);
+                // add this client to list of participants
+                ChatServer.participants.add(joiningParticipantNodeInfo);
 
-            // show who joined
-            System.out.print(joiningParticipantNodeInfo.getName() + " joined. All current participants: ");
+                // show who joined
+                System.out.print(joiningParticipantNodeInfo.getName() + " joined. All current participants: ");
 
-            // print out all current participants
-        case LEAVE:
-        case SHUTDOWN:
-            // remove this participant's info
-            NodeInfo leavingParticipantInfo = (NodeInfo) message.getContent();
-            if (ChatServer.participants.remove(leavingParticipantInfo))
-            {
-                System.err.println(leavingParticipantInfo.getName() + " removed");
-            }
-            else
-            {
-                System.err.println(leavingParticipantInfo.getName() + " not found");
-            }
-
-            // show who left
-            System.out.print(leavingParticipantInfo.getName() + " left. Remaining participants: ");
-
-            // print out all remaining participants
-            participantsIterator = ChatServer.participants.iterator();
-            while(participantsIterator.hasNext())
-            {
-                participantInfo = participantsIterator.next();
-                System.out.print(participantInfo.name + " ");
-            }
-            System.out.println();
-            break;
-        
-        case SHUTDOWN_ALL:
-            // run through all the participants and shut down each single one
-            participantsIterator = ChatServer.participants.iterator();
-            while (participantsIterator.hasNext())
-            {
-                // get next participant
-                participantInfo = participantsIterator.next();
-
-                try
+                // print out all current participants
+            case LEAVE:
+            case SHUTDOWN:
+                // remove this participant's info
+                NodeInfo leavingParticipantInfo = (NodeInfo) message.getContent();
+                if (ChatServer.participants.remove(leavingParticipantInfo))
                 {
-                    // open connection to client
-                    chatConnection = new Socket(participantInfo.address, participantInfo.port);
-
-                    // open object streams
-                    writeToNet = new ObjectOutputStream(chatConnection.getOutputStream());
-                    readFromNet = new ObjectInputStream(chatConnection.getInputStream());
-
-                    // send shutdown message
-                    writeToNet.writeObject(new Message(SHUTDOWN, null));
-
-                    // close connection
-                    chatConnection.close();
+                    System.err.println(leavingParticipantInfo.getName() + " removed");
                 }
-                catch (IOException ex) {
-                    // TODO: handle exception
+                else
+                {
+                    System.err.println(leavingParticipantInfo.getName() + " not found");
                 }
-            }
-    }
+
+                // show who left
+                System.out.print(leavingParticipantInfo.getName() + " left. Remaining participants: ");
+
+                // print out all remaining participants
+                participantsIterator = ChatServer.participants.iterator();
+                while(participantsIterator.hasNext())
+                {
+                    participantInfo = participantsIterator.next();
+                    System.out.print(participantInfo.name + " ");
+                }
+                System.out.println();
+                break;
+
+            case SHUTDOWN_ALL:
+                // run through all the participants and shut down each single one
+                participantsIterator = ChatServer.participants.iterator();
+                while (participantsIterator.hasNext())
+                {
+                    // get next participant
+                    participantInfo = participantsIterator.next();
+
+                    try
+                    {
+                        // open connection to client
+                        chatConnection = new Socket(participantInfo.address, participantInfo.port);
+
+                        // open object streams
+                        writeToNet = new ObjectOutputStream(chatConnection.getOutputStream());
+                        readFromNet = new ObjectInputStream(chatConnection.getInputStream());
+
+                        // send shutdown message
+                        writeToNet.writeObject(new Message(SHUTDOWN, null));
+
+                        // close connection
+                        chatConnection.close();
+                    }
+                    catch (IOException ex) {
+                        // TODO: handle exception
+                    }
+                }
+        }
     }
 }
