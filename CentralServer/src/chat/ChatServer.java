@@ -24,7 +24,7 @@ class ChatServer {
         // open the server socket
         try {
             server = new ServerSocket(serverPort);
-            System.out.println("Chat server socket open!");
+            System.out.println("Chat server socket open! Port:");
             System.out.println(serverPort);
         } catch (IOException ex) {
             Logger.getLogger(ChatServer.class.getName()).log(Level.SEVERE, "Server socket failed to open.", ex);

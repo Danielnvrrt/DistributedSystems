@@ -24,7 +24,6 @@ public class ChatServerWorker extends Thread implements MessageTypes{
     ObjectInputStream readFromNet = null;
 
     public ChatServerWorker(Socket sock){
-    	System.out.println("TRYING");
         this.chatConnection = sock;
     }
 
@@ -58,16 +57,40 @@ public class ChatServerWorker extends Thread implements MessageTypes{
 
             // read participant's NodeInfo
             NodeInfo joiningParticipantNodeInfo = (NodeInfo) message.getContent();
-            System.out.println(joiningParticipantNodeInfo);
 
             // add this client to list of participants
             ChatServer.participants.add(joiningParticipantNodeInfo);
 
             // show who joined
-            System.out.print(joiningParticipantNodeInfo.getName() + " joined. All current participants: ");
+            System.out.print("\n" + joiningParticipantNodeInfo.getName() + " joined.");
+            
+            // show all particiants
+            System.out.print(" All current particiapnts: " + ChatServer.participants);
 
-            // print out all current participants
+            break;
         case LEAVE:
+        	
+        	// read participant's NodeInfo
+        	NodeInfo leavingParticipantNodeInfo = (NodeInfo) message.getContent();
+        	
+        	// remove client from list of participants
+        	ChatServer.participants.remove(message.getContent());
+        	
+        	// show who left
+            System.out.print("\n" + leavingParticipantNodeInfo.getName() + " left.");
+            
+            // show all participants
+            System.out.print(" All current particiapnts: " + ChatServer.participants);
+            
+        	break;
+        case NOTE:
+        	
+        	// print message
+        	System.out.print("\n" + message.getContent());
+        	
+        	
+        	break;
+            
         case SHUTDOWN:
             // remove this participant's info
             NodeInfo leavingParticipantInfo = (NodeInfo) message.getContent();
@@ -120,6 +143,7 @@ public class ChatServerWorker extends Thread implements MessageTypes{
                     // TODO: handle exception
                 }
             }
-    }
+            break;
+    	}
     }
 }
