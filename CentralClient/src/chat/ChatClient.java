@@ -77,6 +77,7 @@ public class ChatClient implements Runnable {
 
 		// create the default connectivity information for the server
 		if (serverPort != 0 && serverIP != null) {
+
 			serverNodeInfo = new NodeInfo(serverIP, serverPort);
 		}
 	}

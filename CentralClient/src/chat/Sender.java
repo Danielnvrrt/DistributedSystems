@@ -137,7 +137,7 @@ public class Sender extends Thread implements MessageTypes {
                 hasJoined = false;
                 System.out.println("Left chat ...");
             }
-            else if (inputLine.startsWith("SHUTDOWN ALL"))
+            else if (inputLine.startsWith("SHUTDOWN_ALL"))
             {
                 if (hasJoined == false)
                 {
