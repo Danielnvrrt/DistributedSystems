@@ -80,12 +80,12 @@ public class Sender extends Thread implements MessageTypes {
 
                     serverConnection = new Socket(ChatClient.serverNodeInfo.getAddress(), ChatClient.serverNodeInfo.getPort());
                     // open object streams
-                    System.out.println("NADA TIOOO");
+
                     readFromNet = new ObjectInputStream(serverConnection.getInputStream());
                     writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
 
 
-
+                    System.out.println(ChatClient.myNodeInfo);
                     // send join request
                     writeToNet.writeObject(new Message(JOIN, ChatClient.myNodeInfo));
 

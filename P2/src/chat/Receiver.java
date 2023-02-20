@@ -44,6 +44,7 @@ public class Receiver extends Thread implements MessageTypes {
       try
       {
         (new ReceiverWorker(receiverSocket.accept())).start();
+        System.out.println("Hi");
 
       }
       

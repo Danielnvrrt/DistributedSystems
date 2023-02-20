@@ -16,6 +16,8 @@ import message.MessageTypes;
 import java.util.Properties;
 import chat.Sender;
 
+import javax.sound.midi.SysexMessage;
+
 public class ReceiverWorker extends Receiver{
 	Socket serverConnection = null;
     ObjectInputStream readFromNet = null;
@@ -28,14 +30,14 @@ public class ReceiverWorker extends Receiver{
 		
 		try
 		{
-			readFromNet = new ObjectInputStream(serverConnection.getInputStream());
-			writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
+            writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
+            readFromNet = new ObjectInputStream(serverConnection.getInputStream());
+
 		}
 		catch(IOException ex)
 		{
 			Logger.getLogger(ReceiverWorker.class.getName()).log(Level.SEVERE, "[ReceiverWorker.run] Could not open object streams.", ex);
 		}
-        System.out.println("Aqui llego");
 	}
 
   @Override
@@ -43,6 +45,7 @@ public class ReceiverWorker extends Receiver{
 	Message message = null;
 	try {
 		ObjectInputStream readFromNet = new ObjectInputStream(serverConnection.getInputStream());
+        System.out.println("REceiver side");
 		message  = (Message) readFromNet.readObject();
     }
 
@@ -55,7 +58,7 @@ public class ReceiverWorker extends Receiver{
 
     switch (message.getType()) {
       case JOIN:
-        System.out.println("holaaaa");
+        System.out.println("hellooo");
         break;
       case SHUTDOWN:
         System.out.println("Received shutdown message from server, exiting");
