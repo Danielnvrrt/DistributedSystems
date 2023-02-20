@@ -1,10 +1,16 @@
 package chat;
 
 import java.io.IOException;
+
+import org.w3c.dom.Node;
 import utils.PropertyHandler;
+
+import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
 import utils.NetworkUtilities;
 
 /**
@@ -18,10 +24,13 @@ public class ChatClient implements Runnable {
 	static Receiver receiver = null;
 	static Sender sender = null;
 
+
 	// set the client connectivity information
 	public static NodeInfo myNodeInfo = null;
 	public static NodeInfo serverNodeInfo = null;
 
+
+	public ArrayList<NodeInfo> participantsInfo = new ArrayList<>();
 	// ChatClient constructor
 	public ChatClient(String propertiesFile) {
 		// try getting the properties from the file
@@ -58,28 +67,10 @@ public class ChatClient implements Runnable {
 		}
 
 		// create the node info for the Client
-		myNodeInfo = new NodeInfo(NetworkUtilities.getMyIP(), myPort, myName);
+		String addres = properties.getProperty("MY_IP");
+		myNodeInfo = new NodeInfo(addres, myPort, myName);
 
-		// get the server's default port number
-		int serverPort = 0;
-		try {
-			serverPort = Integer.parseInt(properties.getProperty("SERVER_PORT"));
-		} catch (NumberFormatException ex) {
-			Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, "Could not read server port", ex);
-		}
 
-		// get the server's default IP address
-		String serverIP = null;
-		serverIP = properties.getProperty("SERVER_IP");
-		if (serverIP == null) {
-			Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, "Could not read server IP address");
-		}
-
-		// create the default connectivity information for the server
-		if (serverPort != 0 && serverIP != null) {
-
-			serverNodeInfo = new NodeInfo(serverIP, serverPort);
-		}
 	}
 
 	// code entry point
@@ -101,10 +92,10 @@ public class ChatClient implements Runnable {
 		try {
 			propertiesFile = args[0];
 		} catch (ArrayIndexOutOfBoundsException ex) {
-			propertiesFile = "CentralClient/config/ChatNodeDefaults.properties";
+			propertiesFile = "confi/ChatNodeDefaults.properties";
 		}
-
 		// start ChatNode
 		(new ChatClient(propertiesFile)).run();
+
 	}
 }

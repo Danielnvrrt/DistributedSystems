@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import message.MessageTypes;
 import utils.PropertyHandler;
 import java.util.Properties;
 
 import utils.NetworkUtilities;
 
-public class Receiver extends Thread {
+public class Receiver extends Thread implements MessageTypes {
   static ServerSocket receiverSocket = null;
   static String userName = null;
 
@@ -42,6 +44,7 @@ public class Receiver extends Thread {
       try
       {
         (new ReceiverWorker(receiverSocket.accept())).start();
+
       }
       
       // if server does not accept receiver

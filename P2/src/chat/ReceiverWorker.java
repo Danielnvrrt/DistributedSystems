@@ -16,7 +16,7 @@ import message.MessageTypes;
 import java.util.Properties;
 import chat.Sender;
 
-public class ReceiverWorker extends Sender{
+public class ReceiverWorker extends Receiver{
 	Socket serverConnection = null;
     ObjectInputStream readFromNet = null;
     ObjectOutputStream writeToNet = null;
@@ -35,6 +35,7 @@ public class ReceiverWorker extends Sender{
 		{
 			Logger.getLogger(ReceiverWorker.class.getName()).log(Level.SEVERE, "[ReceiverWorker.run] Could not open object streams.", ex);
 		}
+        System.out.println("Aqui llego");
 	}
 
   @Override
@@ -53,6 +54,9 @@ public class ReceiverWorker extends Sender{
     }
 
     switch (message.getType()) {
+      case JOIN:
+        System.out.println("holaaaa");
+        break;
       case SHUTDOWN:
         System.out.println("Received shutdown message from server, exiting");
 

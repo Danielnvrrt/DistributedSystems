@@ -14,10 +14,11 @@ import message.Message;
 import message.MessageTypes;
 
 public class Sender extends Thread implements MessageTypes {
-    Socket serverConnection = null;
+
     Scanner userInput = new Scanner(System.in);
     String inputLine = null;
     boolean hasJoined;
+    Socket serverConnection = null;
 
     /**
      * Constructor
@@ -44,6 +45,7 @@ public class Sender extends Thread implements MessageTypes {
 
             if (inputLine.startsWith("JOIN"))
             {
+
                 if (hasJoined == true)
                 {
                     System.err.println("You have already joined a chat ...");
@@ -53,8 +55,8 @@ public class Sender extends Thread implements MessageTypes {
                 // read server information user provided with JOIN command
                 String[] connectivityInfo = inputLine.split("[ ]+");
 
-                // if thnere is information, that may override the connectivity information // that was provided through the properties 
-                
+                // if there is information, that may override the connectivity information // that was provided through the properties
+
                 try
                 { 
                 	ChatClient.serverNodeInfo = new NodeInfo(connectivityInfo[1], Integer.parseInt(connectivityInfo[2])); 
@@ -62,6 +64,7 @@ public class Sender extends Thread implements MessageTypes {
                 catch (ArrayIndexOutOfBoundsException ex)
                 {
                     // don't do anything, we may have defaults
+
                 }
 
                 // check if we have valid server connectivity information
@@ -74,18 +77,18 @@ public class Sender extends Thread implements MessageTypes {
                 // server information was provided, so send join request
                 try
                 {
-                    // open connection to server
-                    System.out.println(ChatClient.serverNodeInfo.getAddress());
-                    System.out.println(ChatClient.serverNodeInfo.getPort());
-                    serverConnection = new Socket(ChatClient.serverNodeInfo.getAddress(), ChatClient.serverNodeInfo.getPort());
 
+                    serverConnection = new Socket(ChatClient.serverNodeInfo.getAddress(), ChatClient.serverNodeInfo.getPort());
                     // open object streams
+                    System.out.println("NADA TIOOO");
                     readFromNet = new ObjectInputStream(serverConnection.getInputStream());
                     writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
 
-                    
+
+
                     // send join request
                     writeToNet.writeObject(new Message(JOIN, ChatClient.myNodeInfo));
+
 
                     // close connection
                     serverConnection.close();
@@ -98,11 +101,10 @@ public class Sender extends Thread implements MessageTypes {
 
                 // we are in!
                 hasJoined = true;
-
                 System.out.println("Joined chat ...");
             }
 
-            else if (inputLine.startsWith("LEAVE"))
+            /*else if (inputLine.startsWith("LEAVE"))
             {
                 if (hasJoined == false)
                 {
@@ -234,7 +236,7 @@ public class Sender extends Thread implements MessageTypes {
                     Logger.getLogger(Sender.class.getName()).log(Level.SEVERE, "Sending message error", ex);
                     continue;
                 }
-            }
+            }*/
         }
   
     }
