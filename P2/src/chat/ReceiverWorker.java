@@ -1,6 +1,7 @@
 package chat;
 
 import java.net.ServerSocket;
+
 import java.net.SocketException;
 import java.io.IOException;
 import java.net.Socket;
@@ -14,11 +15,13 @@ import message.MessageTypes;
 import utils.PropertyHandler;
 import message.MessageTypes;
 import java.util.Properties;
+import java.util.Scanner;
+
 import chat.Sender;
 
 import javax.sound.midi.SysexMessage;
 
-public class ReceiverWorker extends Receiver{
+public class ReceiverWorker extends Thread implements MessageTypes{
 	Socket serverConnection = null;
     ObjectInputStream readFromNet = null;
     ObjectOutputStream writeToNet = null;
@@ -26,39 +29,30 @@ public class ReceiverWorker extends Receiver{
 
 	public ReceiverWorker(Socket sock) {
 		this.serverConnection = sock;
-		
-		
-		try
-		{
-            writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
-            readFromNet = new ObjectInputStream(serverConnection.getInputStream());
-
-		}
-		catch(IOException ex)
-		{
-			Logger.getLogger(ReceiverWorker.class.getName()).log(Level.SEVERE, "[ReceiverWorker.run] Could not open object streams.", ex);
-		}
 	}
 
   @Override
   public void run() {
 	Message message = null;
-	try {
-		ObjectInputStream readFromNet = new ObjectInputStream(serverConnection.getInputStream());
-        System.out.println("REceiver side");
-		message  = (Message) readFromNet.readObject();
-    }
+	  
+	try
+	{
+       writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
+       readFromNet = new ObjectInputStream(serverConnection.getInputStream());
 
-    catch (IOException | ClassNotFoundException ex) {
-      Logger.getLogger(ReceiverWorker.class.getName()).log(Level.SEVERE,
-          "[ReceiverWorker.run] Message could not be read", ex);
-
-      System.exit(1);
-    }
+       message = (Message) readFromNet.readObject();
+       
+       serverConnection.close();
+       
+	}
+	catch(IOException | ClassNotFoundException ex)
+	{
+		Logger.getLogger(ReceiverWorker.class.getName()).log(Level.SEVERE, "[ReceiverWorker.run] Could not open object streams.", ex);
+	}
 
     switch (message.getType()) {
       case JOIN:
-        System.out.println("hellooo");
+    	System.out.println((String) message.getContent() + " Joined.");
         break;
       case SHUTDOWN:
         System.out.println("Received shutdown message from server, exiting");
@@ -76,12 +70,6 @@ public class ReceiverWorker extends Receiver{
       case NOTE:
 
         System.out.println((String) message.getContent());
-
-        try {
-          serverConnection.close();
-        } catch (IOException ex) {
-          Logger.getLogger(ReceiverWorker.class.getName()).log(Level.SEVERE, "Command NOTE failed", ex);
-        }
 
         break;
 

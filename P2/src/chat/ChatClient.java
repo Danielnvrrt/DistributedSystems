@@ -67,7 +67,7 @@ public class ChatClient implements Runnable {
 		}
 
 		// create the node info for the Client
-		String addres = properties.getProperty("MY_IP");
+		String addres = NetworkUtilities.getMyIP();
 		myNodeInfo = new NodeInfo(addres, myPort, myName);
 
 
@@ -78,9 +78,10 @@ public class ChatClient implements Runnable {
 	public void run() {
 		// start the Receiver
 		(receiver = new Receiver()).start();
-
+		
 		// start the sender
 		(sender = new Sender()).start();
+				
 	}
 
 	// main for ChatClient
@@ -92,10 +93,10 @@ public class ChatClient implements Runnable {
 		try {
 			propertiesFile = args[0];
 		} catch (ArrayIndexOutOfBoundsException ex) {
-			propertiesFile = "confi/ChatNodeDefaults.properties";
+			propertiesFile = "config/ChatNodeDefaults.properties";
 		}
 		// start ChatNode
-		(new ChatClient(propertiesFile)).run();
+		new ChatClient(propertiesFile).run();
 
 	}
 }

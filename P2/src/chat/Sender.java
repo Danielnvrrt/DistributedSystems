@@ -57,6 +57,7 @@ public class Sender extends Thread implements MessageTypes {
 
                 // if there is information, that may override the connectivity information // that was provided through the properties
 
+
                 try
                 { 
                 	ChatClient.serverNodeInfo = new NodeInfo(connectivityInfo[1], Integer.parseInt(connectivityInfo[2])); 
@@ -77,17 +78,16 @@ public class Sender extends Thread implements MessageTypes {
                 // server information was provided, so send join request
                 try
                 {
-
+                	
                     serverConnection = new Socket(ChatClient.serverNodeInfo.getAddress(), ChatClient.serverNodeInfo.getPort());
                     // open object streams
+                    
 
                     readFromNet = new ObjectInputStream(serverConnection.getInputStream());
                     writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
 
 
-                    System.out.println(ChatClient.myNodeInfo);
-                    // send join request
-                    writeToNet.writeObject(new Message(JOIN, ChatClient.myNodeInfo));
+                    writeToNet.writeObject(new Message(JOIN, ChatClient.myNodeInfo.getName() + ":" + ChatClient.myNodeInfo.getAddress() + ":" + ChatClient.myNodeInfo.getPort()));
 
 
                     // close connection
@@ -104,7 +104,7 @@ public class Sender extends Thread implements MessageTypes {
                 System.out.println("Joined chat ...");
             }
 
-            /*else if (inputLine.startsWith("LEAVE"))
+            else if (inputLine.startsWith("LEAVE"))
             {
                 if (hasJoined == false)
                 {
@@ -158,7 +158,7 @@ public class Sender extends Thread implements MessageTypes {
                     writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
 
                     // send shutdown all request
-                    writeToNet.writeObject(new Message(SHUTDOWN_ALL, ChatClient.myNodeInfo));
+                    writeToNet.writeObject(new Message(SHUTDOWN, ChatClient.myNodeInfo));
 
                     // close connection
                     serverConnection.close();
@@ -236,7 +236,7 @@ public class Sender extends Thread implements MessageTypes {
                     Logger.getLogger(Sender.class.getName()).log(Level.SEVERE, "Sending message error", ex);
                     continue;
                 }
-            }*/
+            }
         }
   
     }

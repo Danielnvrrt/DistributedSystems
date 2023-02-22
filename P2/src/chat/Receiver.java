@@ -11,7 +11,7 @@ import java.util.Properties;
 
 import utils.NetworkUtilities;
 
-public class Receiver extends Thread implements MessageTypes {
+public class Receiver extends Thread {
   static ServerSocket receiverSocket = null;
   static String userName = null;
 
@@ -34,18 +34,16 @@ public class Receiver extends Thread implements MessageTypes {
     // output that a client is listening on the server
     System.out.println(ChatClient.myNodeInfo.getName() + " listening on " + ChatClient.myNodeInfo.getAddress() + ":"
         + ChatClient.myNodeInfo.getPort());
+    
   }
 
-  @Override
   public void run() {
     while (true) {
     	
       // try having receiver accepted by server
       try
       {
-        (new ReceiverWorker(receiverSocket.accept())).start();
-        System.out.println("Hi");
-
+        new ReceiverWorker(receiverSocket.accept()).start();
       }
       
       // if server does not accept receiver
