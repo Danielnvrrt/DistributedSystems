@@ -23,6 +23,7 @@ public class ChatClient implements Runnable {
 	// set variables for the receiver and the sender
 	static Receiver receiver = null;
 	static Sender sender = null;
+	public static boolean hasJoined = false;
 
 
 	// set the client connectivity information
@@ -93,7 +94,7 @@ public class ChatClient implements Runnable {
 		try {
 			propertiesFile = args[0];
 		} catch (ArrayIndexOutOfBoundsException ex) {
-			propertiesFile = "config/ChatNodeDefaults.properties";
+			propertiesFile = "config/ChatNodeDefaults2.properties";
 		}
 		// start ChatNode
 		new ChatClient(propertiesFile).run();

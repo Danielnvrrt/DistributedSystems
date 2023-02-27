@@ -15,8 +15,9 @@ import message.MessageTypes;
 
 public class Sender extends Thread implements MessageTypes {
 
-    Scanner userInput = new Scanner(System.in);
+    static Scanner userInput = new Scanner(System.in);
     String inputLine = null;
+    String forceCommand = null;
     boolean hasJoined;
     Socket serverConnection = null;
 
@@ -26,6 +27,11 @@ public class Sender extends Thread implements MessageTypes {
     public Sender() {
         userInput = new Scanner(System.in);
         hasJoined = false;
+    }
+    
+    public Sender(String command) {
+    	inputLine = command;
+    	userInput = new Scanner(System.in);
     }
 
     /**
@@ -40,20 +46,38 @@ public class Sender extends Thread implements MessageTypes {
         // until forever, unless the user enters SHUTDOWN or SHUTDONW ALL
         while (true)
         {
-            //get user input
-            inputLine = userInput.nextLine();
+            //get user input or force a command
+        	if (inputLine == null) {
+        		System.out.println("Waiting for input...");
+        		inputLine = userInput.nextLine();
+        	}
+
 
             if (inputLine.startsWith("JOIN"))
             {
 
-                if (hasJoined == true)
+            	
+            	// Check if client is already connected
+                if (ChatClient.hasJoined == true)
                 {
-                    System.err.println("You have already joined a chat ...");
+                	if (inputLine != null) {
+                		inputLine = null;
+                	}
+                	else {
+                		System.err.println("You have already joined a chat ...");
+                	}
                     continue;
                 }
-
+				
+                
                 // read server information user provided with JOIN command
-                String[] connectivityInfo = inputLine.split("[ ]+");
+                String[] connectivityInfo = null;
+                if (inputLine == null) {
+                	connectivityInfo = forceCommand.split("[ ]+");
+                }
+                else {
+                	connectivityInfo = inputLine.split("[ ]+");
+                }
 
                 // if there is information, that may override the connectivity information // that was provided through the properties
 
@@ -100,13 +124,14 @@ public class Sender extends Thread implements MessageTypes {
                 }
 
                 // we are in!
-                hasJoined = true;
+                ChatClient.hasJoined = true;
                 System.out.println("Joined chat ...");
+                forceCommand = null;
             }
 
             else if (inputLine.startsWith("LEAVE"))
             {
-                if (hasJoined == false)
+                if (ChatClient.hasJoined == false)
                 {
                     System.err.println("You have not joined a chat yet ...");
                     continue;
@@ -141,7 +166,7 @@ public class Sender extends Thread implements MessageTypes {
             }
             else if (inputLine.startsWith("SHUTDOWN_ALL"))
             {
-                if (hasJoined == false)
+                if (ChatClient.hasJoined == false)
                 {
                     System.err.println("To shutdown the whole chat, you need to first Join a chat ...");
                     continue;
@@ -174,7 +199,7 @@ public class Sender extends Thread implements MessageTypes {
             else if (inputLine.startsWith("SHUTDOWN"))
             {
                 // if we are a participant, leave chat first  
-                if (hasJoined == true)
+                if (ChatClient.hasJoined == true)
                 {                  
                     try
                     {
@@ -207,9 +232,10 @@ public class Sender extends Thread implements MessageTypes {
 
             else
             {
-                if (hasJoined == false)
+                if (ChatClient.hasJoined == false)
                 {
                     System.err.println("You need to join a chat first!");
+                    inputLine = null;
                     continue;
                 }
 
@@ -225,10 +251,12 @@ public class Sender extends Thread implements MessageTypes {
 
                     // send note request
                     writeToNet.writeObject(new Message(NOTE, ChatClient.myNodeInfo.getName() + ": " + inputLine));
+                    writeToNet.flush();
 
                     // close connection
                     serverConnection.close();
-                    System.out.println("Message sent ...");
+                    System.out.println(ChatClient.myNodeInfo.getName() + ": " + inputLine);
+                    inputLine = null;
 
                 }
                 catch (IOException ex)
@@ -237,6 +265,7 @@ public class Sender extends Thread implements MessageTypes {
                     continue;
                 }
             }
+            
         }
   
     }

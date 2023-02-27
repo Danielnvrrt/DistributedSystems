@@ -31,7 +31,8 @@ public class ReceiverWorker extends Thread implements MessageTypes{
 		this.serverConnection = sock;
 	}
 
-  @Override
+  @SuppressWarnings("removal")
+@Override
   public void run() {
 	Message message = null;
 	  
@@ -49,10 +50,15 @@ public class ReceiverWorker extends Thread implements MessageTypes{
 	{
 		Logger.getLogger(ReceiverWorker.class.getName()).log(Level.SEVERE, "[ReceiverWorker.run] Could not open object streams.", ex);
 	}
-
     switch (message.getType()) {
       case JOIN:
-    	System.out.println((String) message.getContent() + " Joined.");
+    	String clientInfo = (String) message.getContent();
+    	System.out.println(clientInfo + " Joined.");
+    	String[] connectingClientInfo = clientInfo.split(":", 4);
+    	System.out.println("JOIN " + connectingClientInfo[1] + " " + connectingClientInfo[2]);
+    	ChatClient.sender.stop();
+    	(ChatClient.sender = new Sender("JOIN " + connectingClientInfo[1] + " " + connectingClientInfo[2])).start();
+    	
         break;
       case SHUTDOWN:
         System.out.println("Received shutdown message from server, exiting");
