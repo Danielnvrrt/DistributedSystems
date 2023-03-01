@@ -72,7 +72,6 @@ public class ReceiverWorker extends Thread implements MessageTypes{
     					clientsInfo.get(count).setJoined(true);
     				}
     				ChatClient.participantsInfo.add(clientsInfo.get(count));
-    				System.out.println(ChatClient.participantsInfo);
     		}
     	}
         break;

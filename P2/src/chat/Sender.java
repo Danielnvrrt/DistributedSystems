@@ -60,7 +60,9 @@ public class Sender extends Thread implements MessageTypes {
             	// Check if client is already connected
                 if (hasJoined == true)
                 {
-                	System.err.println("You have already joined a chat ...");
+                	if (participantNum == 0) {
+                		System.err.println("You have already joined a chat ...");
+                	}
                 	inputLine = null;
                     continue;
                 }
