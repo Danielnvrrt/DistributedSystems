@@ -31,6 +31,7 @@ public class ChatClient implements Runnable {
 
 
 	public static ArrayList<NodeInfo> participantsInfo = new ArrayList<>();
+	public static ArrayList<String> currentParticipants = new ArrayList<>();
 	public static ArrayList<String> visitedParticipant = new ArrayList<>();
 	// ChatClient constructor
 	public ChatClient(String propertiesFile) {
@@ -72,7 +73,7 @@ public class ChatClient implements Runnable {
 		myNodeInfo = new NodeInfo(addres, myPort, myName, false);
 
 		participantsInfo.add(myNodeInfo);
-		
+		currentParticipants.add(addres + String.valueOf(myPort));
 	}
 
 	// code entry point
@@ -95,7 +96,7 @@ public class ChatClient implements Runnable {
 		try {
 			propertiesFile = args[0];
 		} catch (ArrayIndexOutOfBoundsException ex) {
-			propertiesFile = "config/ChatNodeDefaults2.properties";
+			propertiesFile = "config/ChatNodeDefaults.properties";
 		}
 		// start ChatNode
 		new ChatClient(propertiesFile).run();

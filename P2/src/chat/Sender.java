@@ -253,8 +253,8 @@ public class Sender extends Thread implements MessageTypes {
 
                         // close connection
                         serverConnection.close();
-                        System.out.println(ChatClient.myNodeInfo.getName() + ": " + inputLine);
         			}
+                	System.out.println(ChatClient.myNodeInfo.getName() + ": " + inputLine);
                     inputLine = null;
 
                 }

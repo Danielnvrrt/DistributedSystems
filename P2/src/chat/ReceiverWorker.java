@@ -63,7 +63,8 @@ public class ReceiverWorker extends Thread implements MessageTypes{
     	// combine two participants lists
     	for (int count = 0; count < clientsInfo.size(); count++) {
     		if (clientsInfo.get(count).getAddress() != ChatClient.participantsInfo.get(0).getAddress()
-    			&& clientsInfo.get(count).getPort() != ChatClient.participantsInfo.get(0).getPort()) {
+    			&& clientsInfo.get(count).getPort() != ChatClient.participantsInfo.get(0).getPort() 
+    			&& !ChatClient.currentParticipants.contains(clientsInfo.get(count).getAddress() + String.valueOf(clientsInfo.get(count).getPort()))) {
     				System.out.println(clientsInfo.get(count).getName() + " Joined.");
     				if(!ChatClient.visitedParticipant.contains(clientsInfo.get(count).getAddress() + String.valueOf(clientsInfo.get(count).getPort()))) {
     					clientsInfo.get(count).setJoined(false);
@@ -72,6 +73,7 @@ public class ReceiverWorker extends Thread implements MessageTypes{
     					clientsInfo.get(count).setJoined(true);
     				}
     				ChatClient.participantsInfo.add(clientsInfo.get(count));
+    				ChatClient.currentParticipants.add(clientsInfo.get(count).getAddress() + String.valueOf(clientsInfo.get(count).getPort()));
     		}
     	}
         break;
