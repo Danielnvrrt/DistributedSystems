@@ -14,8 +14,12 @@ import message.Message;
 import message.MessageTypes;
 import utils.PropertyHandler;
 import message.MessageTypes;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.Set;
 
 import chat.Sender;
 
@@ -52,13 +56,25 @@ public class ReceiverWorker extends Thread implements MessageTypes{
 	}
     switch (message.getType()) {
       case JOIN:
-    	String clientInfo = (String) message.getContent();
-    	System.out.println(clientInfo + " Joined.");
-    	String[] connectingClientInfo = clientInfo.split(":", 4);
-    	System.out.println("JOIN " + connectingClientInfo[1] + " " + connectingClientInfo[2]);
-    	ChatClient.sender.stop();
-    	(ChatClient.sender = new Sender("JOIN " + connectingClientInfo[1] + " " + connectingClientInfo[2])).start();
+    	@SuppressWarnings("unchecked")
+    	ArrayList<NodeInfo> clientsInfo = (ArrayList<NodeInfo>) message.getContent();
+    	ChatClient.participantsInfo.get(0).setJoined(true);
     	
+    	// combine two participants lists
+    	for (int count = 0; count < clientsInfo.size(); count++) {
+    		if (clientsInfo.get(count).getAddress() != ChatClient.participantsInfo.get(0).getAddress()
+    			&& clientsInfo.get(count).getPort() != ChatClient.participantsInfo.get(0).getPort()) {
+    				System.out.println(clientsInfo.get(count).getName() + " Joined.");
+    				if(!ChatClient.visitedParticipant.contains(clientsInfo.get(count).getAddress() + String.valueOf(clientsInfo.get(count).getPort()))) {
+    					clientsInfo.get(count).setJoined(false);
+    				}
+    				else {
+    					clientsInfo.get(count).setJoined(true);
+    				}
+    				ChatClient.participantsInfo.add(clientsInfo.get(count));
+    				System.out.println(ChatClient.participantsInfo);
+    		}
+    	}
         break;
       case SHUTDOWN:
         System.out.println("Received shutdown message from server, exiting");

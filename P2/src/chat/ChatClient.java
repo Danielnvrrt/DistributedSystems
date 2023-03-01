@@ -22,8 +22,7 @@ public class ChatClient implements Runnable {
 
 	// set variables for the receiver and the sender
 	static Receiver receiver = null;
-	static Sender sender = null;
-	public static boolean hasJoined = false;
+	static Sender[] sender = new Sender[10];
 
 
 	// set the client connectivity information
@@ -31,7 +30,8 @@ public class ChatClient implements Runnable {
 	public static NodeInfo serverNodeInfo = null;
 
 
-	public ArrayList<NodeInfo> participantsInfo = new ArrayList<>();
+	public static ArrayList<NodeInfo> participantsInfo = new ArrayList<>();
+	public static ArrayList<String> visitedParticipant = new ArrayList<>();
 	// ChatClient constructor
 	public ChatClient(String propertiesFile) {
 		// try getting the properties from the file
@@ -69,9 +69,10 @@ public class ChatClient implements Runnable {
 
 		// create the node info for the Client
 		String addres = NetworkUtilities.getMyIP();
-		myNodeInfo = new NodeInfo(addres, myPort, myName);
+		myNodeInfo = new NodeInfo(addres, myPort, myName, false);
 
-
+		participantsInfo.add(myNodeInfo);
+		
 	}
 
 	// code entry point
@@ -81,7 +82,7 @@ public class ChatClient implements Runnable {
 		(receiver = new Receiver()).start();
 		
 		// start the sender
-		(sender = new Sender()).start();
+		(sender[0] = new Sender()).start();
 				
 	}
 
@@ -98,6 +99,20 @@ public class ChatClient implements Runnable {
 		}
 		// start ChatNode
 		new ChatClient(propertiesFile).run();
-
+		
+		while(true) {
+			for (int count = 1; count < participantsInfo.size(); count++) {
+				if(participantsInfo.get(count).getJoined() == false) {
+					(sender[count] = new Sender("JOIN " + participantsInfo.get(count).getAddress() + " " + String.valueOf(participantsInfo.get(count).getPort()), count)).start();
+					try {
+						Thread.sleep(2);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					participantsInfo.get(count).setJoined(true);
+				}
+			}
+		}
 	}
 }

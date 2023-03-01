@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import java.util.logging.Level;
@@ -18,18 +18,19 @@ public class Sender extends Thread implements MessageTypes {
     static Scanner userInput = new Scanner(System.in);
     String inputLine = null;
     String forceCommand = null;
-    boolean hasJoined;
     Socket serverConnection = null;
+    Integer participantNum = 0;
+    boolean hasJoined = false;
 
     /**
      * Constructor
      */
     public Sender() {
         userInput = new Scanner(System.in);
-        hasJoined = false;
     }
     
-    public Sender(String command) {
+    public Sender(String command, Integer count) {
+    	participantNum = count;
     	inputLine = command;
     	userInput = new Scanner(System.in);
     }
@@ -48,7 +49,6 @@ public class Sender extends Thread implements MessageTypes {
         {
             //get user input or force a command
         	if (inputLine == null) {
-        		System.out.println("Waiting for input...");
         		inputLine = userInput.nextLine();
         	}
 
@@ -58,26 +58,17 @@ public class Sender extends Thread implements MessageTypes {
 
             	
             	// Check if client is already connected
-                if (ChatClient.hasJoined == true)
+                if (hasJoined == true)
                 {
-                	if (inputLine != null) {
-                		inputLine = null;
-                	}
-                	else {
-                		System.err.println("You have already joined a chat ...");
-                	}
+                	System.err.println("You have already joined a chat ...");
+                	inputLine = null;
                     continue;
                 }
 				
                 
                 // read server information user provided with JOIN command
                 String[] connectivityInfo = null;
-                if (inputLine == null) {
-                	connectivityInfo = forceCommand.split("[ ]+");
-                }
-                else {
-                	connectivityInfo = inputLine.split("[ ]+");
-                }
+                connectivityInfo = inputLine.split("[ ]+");
 
                 // if there is information, that may override the connectivity information // that was provided through the properties
 
@@ -91,6 +82,8 @@ public class Sender extends Thread implements MessageTypes {
                     // don't do anything, we may have defaults
 
                 }
+                
+                
 
                 // check if we have valid server connectivity information
                 if (ChatClient.serverNodeInfo == null)
@@ -98,6 +91,8 @@ public class Sender extends Thread implements MessageTypes {
                     System.err.println("[Sender].run No server connectivity information provided!");
                     continue;
                 }
+                
+                ChatClient.visitedParticipant.add(connectivityInfo[1] + connectivityInfo[2]);
 
                 // server information was provided, so send join request
                 try
@@ -111,7 +106,7 @@ public class Sender extends Thread implements MessageTypes {
                     writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
 
 
-                    writeToNet.writeObject(new Message(JOIN, ChatClient.myNodeInfo.getName() + ":" + ChatClient.myNodeInfo.getAddress() + ":" + ChatClient.myNodeInfo.getPort()));
+                    writeToNet.writeObject(new Message(JOIN, ChatClient.participantsInfo));
 
 
                     // close connection
@@ -124,14 +119,14 @@ public class Sender extends Thread implements MessageTypes {
                 }
 
                 // we are in!
-                ChatClient.hasJoined = true;
+                hasJoined = true;
                 System.out.println("Joined chat ...");
                 forceCommand = null;
             }
 
             else if (inputLine.startsWith("LEAVE"))
             {
-                if (ChatClient.hasJoined == false)
+                if (ChatClient.participantsInfo.get(participantNum).getJoined() == false)
                 {
                     System.err.println("You have not joined a chat yet ...");
                     continue;
@@ -161,12 +156,12 @@ public class Sender extends Thread implements MessageTypes {
                 }
 
                 // we are out
-                hasJoined = false;
+                ChatClient.participantsInfo.get(participantNum).hasJoined = false;
                 System.out.println("Left chat ...");
             }
             else if (inputLine.startsWith("SHUTDOWN_ALL"))
             {
-                if (ChatClient.hasJoined == false)
+                if (ChatClient.participantsInfo.get(0).hasJoined == false)
                 {
                     System.err.println("To shutdown the whole chat, you need to first Join a chat ...");
                     continue;
@@ -199,7 +194,7 @@ public class Sender extends Thread implements MessageTypes {
             else if (inputLine.startsWith("SHUTDOWN"))
             {
                 // if we are a participant, leave chat first  
-                if (ChatClient.hasJoined == true)
+                if (ChatClient.participantsInfo.get(0).hasJoined == true)
                 {                  
                     try
                     {
@@ -232,7 +227,7 @@ public class Sender extends Thread implements MessageTypes {
 
             else
             {
-                if (ChatClient.hasJoined == false)
+                if (ChatClient.participantsInfo.get(0).hasJoined == false)
                 {
                     System.err.println("You need to join a chat first!");
                     inputLine = null;
@@ -243,19 +238,21 @@ public class Sender extends Thread implements MessageTypes {
                 try
                 {
                     // open connection to server
-                    serverConnection = new Socket(ChatClient.serverNodeInfo.getAddress(), ChatClient.serverNodeInfo.getPort());
-                    
-                    // open object streams
-                    readFromNet = new ObjectInputStream(serverConnection.getInputStream());
-                    writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
+                	for (int count = 1; count < ChatClient.participantsInfo.size(); count++) {
+                		serverConnection = new Socket(ChatClient.participantsInfo.get(count).getAddress(), ChatClient.participantsInfo.get(count).getPort());
+                        
+                        // open object streams
+                        readFromNet = new ObjectInputStream(serverConnection.getInputStream());
+                        writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
 
-                    // send note request
-                    writeToNet.writeObject(new Message(NOTE, ChatClient.myNodeInfo.getName() + ": " + inputLine));
-                    writeToNet.flush();
+                        // send note request
+                        writeToNet.writeObject(new Message(NOTE, ChatClient.myNodeInfo.getName() + ": " + inputLine));
+                        writeToNet.flush();
 
-                    // close connection
-                    serverConnection.close();
-                    System.out.println(ChatClient.myNodeInfo.getName() + ": " + inputLine);
+                        // close connection
+                        serverConnection.close();
+                        System.out.println(ChatClient.myNodeInfo.getName() + ": " + inputLine);
+        			}
                     inputLine = null;
 
                 }
