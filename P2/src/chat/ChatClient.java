@@ -96,7 +96,7 @@ public class ChatClient implements Runnable {
 		try {
 			propertiesFile = args[0];
 		} catch (ArrayIndexOutOfBoundsException ex) {
-			propertiesFile = "config/ChatNodeDefaults.properties";
+			propertiesFile = "config/ChatNodeDefaults2.properties";
 		}
 		// start ChatNode
 		new ChatClient(propertiesFile).run();
