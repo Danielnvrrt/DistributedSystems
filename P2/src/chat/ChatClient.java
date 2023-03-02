@@ -101,6 +101,7 @@ public class ChatClient implements Runnable {
 		// start ChatNode
 		new ChatClient(propertiesFile).run();
 		
+		/*
 		while(true) {
 			for (int count = 1; count < participantsInfo.size(); count++) {
 				if(participantsInfo.get(count).getJoined() == false) {
@@ -115,5 +116,6 @@ public class ChatClient implements Runnable {
 				}
 			}
 		}
+		*/
 	}
 }

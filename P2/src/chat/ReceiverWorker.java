@@ -76,6 +76,20 @@ public class ReceiverWorker extends Thread implements MessageTypes{
     				ChatClient.currentParticipants.add(clientsInfo.get(count).getAddress() + String.valueOf(clientsInfo.get(count).getPort()));
     		}
     	}
+    	
+    	
+    	for (int count = 1; count < ChatClient.participantsInfo.size(); count++) {
+			if(ChatClient.participantsInfo.get(count).getJoined() == false) {
+				(ChatClient.sender[count] = new Sender("JOIN " + ChatClient.participantsInfo.get(count).getAddress() + " " + String.valueOf(ChatClient.participantsInfo.get(count).getPort()), count)).start();
+				try {
+					Thread.sleep(2);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				ChatClient.participantsInfo.get(count).setJoined(true);
+			}
+		}
         break;
       case SHUTDOWN:
         System.out.println("Received shutdown message from server, exiting");
