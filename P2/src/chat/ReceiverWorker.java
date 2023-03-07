@@ -79,6 +79,7 @@ public class ReceiverWorker extends Thread implements MessageTypes{
     	
     	
     	for (int count = 1; count < ChatClient.participantsInfo.size(); count++) {
+
 			if(ChatClient.participantsInfo.get(count).getJoined() == false) {
 				(ChatClient.sender[count] = new Sender("JOIN " + ChatClient.participantsInfo.get(count).getAddress() + " " + String.valueOf(ChatClient.participantsInfo.get(count).getPort()), count)).start();
 				try {
@@ -91,6 +92,44 @@ public class ReceiverWorker extends Thread implements MessageTypes{
 			}
 		}
         break;
+
+	  case LEAVE:
+		  @SuppressWarnings("unchecked")
+		  ArrayList<NodeInfo> clientsInfo = (ArrayList<NodeInfo>) message.getContent();
+		  ChatClient.participantsInfo.get(0).setJoined(true);
+
+		  for (int count = 0; count < clientsInfo.size(); count++) {
+			  if (clientsInfo.get(count).getAddress() != ChatClient.participantsInfo.get(0).getAddress()
+					  && clientsInfo.get(count).getPort() != ChatClient.participantsInfo.get(0).getPort()
+					  && !ChatClient.currentParticipants.contains(clientsInfo.get(count).getAddress() + String.valueOf(clientsInfo.get(count).getPort()))) {
+				  System.out.println(clientsInfo.get(count).getName() + " left the chat.");
+				  if(!ChatClient.visitedParticipant.contains(clientsInfo.get(count).getAddress() + String.valueOf(clientsInfo.get(count).getPort()))) {
+					  clientsInfo.get(count).setJoined(false);
+				  }
+				  else {
+					  clientsInfo.get(count).setJoined(true);
+				  }
+				  ChatClient.participantsInfo.add(clientsInfo.get(count));
+				  ChatClient.currentParticipants.add(clientsInfo.get(count).getAddress() + String.valueOf(clientsInfo.get(count).getPort()));
+			  }
+		  }
+
+		  for (int count = 1; count < ChatClient.participantsInfo.size(); count++) {
+
+			  if(ChatClient.participantsInfo.get(count).getJoined() == false) {
+				  (ChatClient.sender[count] = new Sender("LEAVE " + ChatClient.participantsInfo.get(count).getAddress() + " " + String.valueOf(ChatClient.participantsInfo.get(count).getPort()), count)).start();
+				  try {
+					  Thread.sleep(2);
+				  } catch (InterruptedException e) {
+					  // TODO Auto-generated catch block
+					  e.printStackTrace();
+				  }
+				  ChatClient.participantsInfo.get(count).setJoined(true);
+			  }
+		  }
+
+		  break;
+
       case SHUTDOWN:
         System.out.println("Received shutdown message from server, exiting");
 
