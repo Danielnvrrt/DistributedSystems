@@ -56,12 +56,13 @@ public class ReceiverWorker extends Thread implements MessageTypes{
 		Logger.getLogger(ReceiverWorker.class.getName()).log(Level.SEVERE, "[ReceiverWorker.run] Could not open object streams.", ex);
 	}
     switch (message.getType()) {
+	  //Join Method
       case JOIN:
-    	@SuppressWarnings("unchecked")
+		// Get list of participants
     	ArrayList<NodeInfo> clientsInfo = (ArrayList<NodeInfo>) message.getContent();
     	ChatClient.participantsInfo.get(0).setJoined(true);
     	
-    	// combine two participants lists
+    	// Add participants to client's own list
     	for (int count = 0; count < clientsInfo.size(); count++) {
     		if (clientsInfo.get(count).getAddress() != ChatClient.participantsInfo.get(0).getAddress()
     			&& clientsInfo.get(count).getPort() != ChatClient.participantsInfo.get(0).getPort() 
@@ -78,11 +79,11 @@ public class ReceiverWorker extends Thread implements MessageTypes{
     		}
     	}
     	
-    	
+		// Join each new participant
     	for (int count = 1; count < ChatClient.participantsInfo.size(); count++) {
 
 			if(ChatClient.participantsInfo.get(count).getJoined() == false) {
-				(ChatClient.sender[count] = new Sender("JOIN " + ChatClient.participantsInfo.get(count).getAddress() + " " + String.valueOf(ChatClient.participantsInfo.get(count).getPort()), count)).start();
+				(ChatClient.sender[0] = new Sender("JOIN " + ChatClient.participantsInfo.get(count).getAddress() + " " + String.valueOf(ChatClient.participantsInfo.get(count).getPort()), count)).start();
 				try {
 					Thread.sleep(2);
 				} catch (InterruptedException e) {
@@ -92,31 +93,40 @@ public class ReceiverWorker extends Thread implements MessageTypes{
 				ChatClient.participantsInfo.get(count).setJoined(true);
 			}
 		}
+
         break;
+	  // Shutdown and Leave methods
 	  case SHUTDOWN:
 	  case LEAVE:
-
+		  // Receive leaving client information
 		  NodeInfo leavingClient = (NodeInfo) message.getContent();
 		  System.out.println(leavingClient.getName() + " left chat");
-		  ChatClient.currentParticipants.remove(leavingClient);
-		  ChatClient.visitedParticipant.remove(leavingClient);
+		  // Remove client from all lists
+		  ChatClient.currentParticipants.remove(leavingClient.getAddress() + String.valueOf(leavingClient.getPort()));
+		  ChatClient.visitedParticipant.remove(leavingClient.getAddress() + String.valueOf(leavingClient.getPort()));
+		  for(int i = 0; i < ChatClient.participantsInfo.size(); i++){
+			  if(leavingClient.getName() == ChatClient.participantsInfo.get(i).getName()){
+				  ChatClient.participantsInfo.remove(ChatClient.participantsInfo.get(i));
+			  }
+		  }
 		  break;
 
-
+	  // Shutdown all method
 	  case SHUTDOWN_ALL:
+		  // Receive the client information who sent the shutdown_all request
 		  NodeInfo shutdownClient = (NodeInfo) message.getContent();
 		  System.out.println("Received shutdown message from " + shutdownClient.getName() +", exiting");
-
+		  // Close server connection
 		  try {
 			  serverConnection.close();
 		  } catch (IOException ex) {
 			  // dont care
 		  }
-
+		  // Stop system
 		  System.exit(0);
 		  break;
       case NOTE:
-
+		// Display the message
         System.out.println((String) message.getContent());
 
         break;

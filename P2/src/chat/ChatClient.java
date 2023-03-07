@@ -30,6 +30,7 @@ public class ChatClient implements Runnable {
 	public static NodeInfo serverNodeInfo = null;
 
 
+	// Set the information lists
 	public static ArrayList<NodeInfo> participantsInfo = new ArrayList<>();
 	public static ArrayList<String> currentParticipants = new ArrayList<>();
 	public static ArrayList<String> visitedParticipant = new ArrayList<>();
@@ -100,22 +101,6 @@ public class ChatClient implements Runnable {
 		}
 		// start ChatNode
 		new ChatClient(propertiesFile).run();
-		
-		/*
-		while(true) {
-			for (int count = 1; count < participantsInfo.size(); count++) {
-				if(participantsInfo.get(count).getJoined() == false) {
-					(sender[count] = new Sender("JOIN " + participantsInfo.get(count).getAddress() + " " + String.valueOf(participantsInfo.get(count).getPort()), count)).start();
-					try {
-						Thread.sleep(2);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					participantsInfo.get(count).setJoined(true);
-				}
-			}
-		}
-		*/
+
 	}
 }
