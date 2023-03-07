@@ -130,25 +130,31 @@ public class Sender extends Thread implements MessageTypes {
             {
                 if (ChatClient.participantsInfo.get(participantNum).getJoined() == false)
                 {
+
                     System.err.println("You have not joined a chat yet ...");
+
                     continue;
                 }
 
                 // send leave request
                 try
                 {
-                    // open connection to server
-                    serverConnection = new Socket(ChatClient.serverNodeInfo.getAddress(), ChatClient.serverNodeInfo.getPort());
-                    
-                    // open object streams
-                    readFromNet = new ObjectInputStream(serverConnection.getInputStream());
-                    writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
+                    // open connection to serve
+                    for (int count = 1; count < ChatClient.participantsInfo.size(); count++) {
+                        serverConnection = new Socket(ChatClient.participantsInfo.get(count).getAddress(), ChatClient.participantsInfo.get(count).getPort());
 
-                    // send join request
-                    writeToNet.writeObject(new Message(LEAVE, ChatClient.myNodeInfo));
+                        // open object streams
+                        readFromNet = new ObjectInputStream(serverConnection.getInputStream());
+                        writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
 
-                    // close connection
-                    serverConnection.close();
+                        // send note request
+                        writeToNet.writeObject(new Message(LEAVE, ChatClient.participantsInfo.get(0)));
+                        writeToNet.flush();
+
+                        // close connection
+                        serverConnection.close();
+                    }
+
 
                 }
                 catch (IOException ex)
@@ -158,7 +164,7 @@ public class Sender extends Thread implements MessageTypes {
                 }
 
                 // we are out
-                ChatClient.participantsInfo.get(participantNum).hasJoined = false;
+                hasJoined = false;
                 System.out.println("Left chat ...");
             }
             else if (inputLine.startsWith("SHUTDOWN_ALL"))
@@ -172,18 +178,22 @@ public class Sender extends Thread implements MessageTypes {
                 // we are a participant, send out a SHUTDOWN_ALL message
                 try
                 {
-                    // open connection to server
-                    serverConnection = new Socket(ChatClient.serverNodeInfo.getAddress(), ChatClient.serverNodeInfo.getPort());
-                    
-                    // open object streams
-                    readFromNet = new ObjectInputStream(serverConnection.getInputStream());
-                    writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
+                    for (int count = 1; count < ChatClient.participantsInfo.size(); count++) {
+                        serverConnection = new Socket(ChatClient.participantsInfo.get(count).getAddress(), ChatClient.participantsInfo.get(count).getPort());
 
-                    // send shutdown all request
-                    writeToNet.writeObject(new Message(SHUTDOWN, ChatClient.myNodeInfo));
+                        // open object streams
+                        readFromNet = new ObjectInputStream(serverConnection.getInputStream());
+                        writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
 
-                    // close connection
-                    serverConnection.close();
+                        // send note request
+                        writeToNet.writeObject(new Message(SHUTDOWN_ALL, ChatClient.participantsInfo.get(0)));
+                        writeToNet.flush();
+
+                        // close connection
+                        serverConnection.close();
+
+                    }
+
 
                 }
                 catch (IOException ex)
@@ -192,38 +202,48 @@ public class Sender extends Thread implements MessageTypes {
                     continue;
                 }
                 System.out.println("Sent shutdown all request ... \n");
+                System.exit(0);
             }
             else if (inputLine.startsWith("SHUTDOWN"))
             {
-                // if we are a participant, leave chat first  
-                if (ChatClient.participantsInfo.get(0).hasJoined == true)
-                {                  
-                    try
-                    {
-                        // open connection to server
-                        serverConnection = new Socket(ChatClient.serverNodeInfo.getAddress(), ChatClient.serverNodeInfo.getPort());
-                    
+                if (ChatClient.participantsInfo.get(participantNum).getJoined() == false)
+                {
+
+                    System.err.println("You have not joined a chat yet ...");
+
+                    continue;
+                }
+
+                // send leave request
+                try
+                {
+                    // open connection to serve
+                    for (int count = 1; count < ChatClient.participantsInfo.size(); count++) {
+                        serverConnection = new Socket(ChatClient.participantsInfo.get(count).getAddress(), ChatClient.participantsInfo.get(count).getPort());
+
                         // open object streams
                         readFromNet = new ObjectInputStream(serverConnection.getInputStream());
                         writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
 
-                        // send leave request
-                        writeToNet.writeObject(new Message(SHUTDOWN, ChatClient.myNodeInfo));
+                        // send note request
+                        writeToNet.writeObject(new Message(SHUTDOWN, ChatClient.participantsInfo.get(0)));
+                        writeToNet.flush();
 
                         // close connection
                         serverConnection.close();
-
-                        System.out.println("Left chat ...");
-
                     }
-                    catch (IOException ex)
-                    {
-                        Logger.getLogger(Sender.class.getName()).log(Level.SEVERE, "Error connecting to server or opening or writing/reading object streams or closing connection", ex);
-                        continue;
-                    }
-             
+
+
                 }
-                System.out.println("Exiting ... \n");
+                catch (IOException ex)
+                {
+                    Logger.getLogger(Sender.class.getName()).log(Level.SEVERE, "Error connecting to server or opening or writing/reading object streams or closing connection", ex);
+                    continue;
+                }
+
+                // we are out
+                hasJoined = false;
+                System.out.println("Shutdown chat ...");
                 System.exit(0);
             }
 
@@ -264,7 +284,7 @@ public class Sender extends Thread implements MessageTypes {
                     continue;
                 }
             }
-            
+            inputLine = null;
         }
   
     }

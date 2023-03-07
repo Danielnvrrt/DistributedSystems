@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 
 import message.Message;
 import message.MessageTypes;
+import org.w3c.dom.Node;
 import utils.PropertyHandler;
 import message.MessageTypes;
 
@@ -92,57 +93,28 @@ public class ReceiverWorker extends Thread implements MessageTypes{
 			}
 		}
         break;
-
+	  case SHUTDOWN:
 	  case LEAVE:
-		  @SuppressWarnings("unchecked")
-		  ArrayList<NodeInfo> clientsInfo = (ArrayList<NodeInfo>) message.getContent();
-		  ChatClient.participantsInfo.get(0).setJoined(true);
 
-		  for (int count = 0; count < clientsInfo.size(); count++) {
-			  if (clientsInfo.get(count).getAddress() != ChatClient.participantsInfo.get(0).getAddress()
-					  && clientsInfo.get(count).getPort() != ChatClient.participantsInfo.get(0).getPort()
-					  && !ChatClient.currentParticipants.contains(clientsInfo.get(count).getAddress() + String.valueOf(clientsInfo.get(count).getPort()))) {
-				  System.out.println(clientsInfo.get(count).getName() + " left the chat.");
-				  if(!ChatClient.visitedParticipant.contains(clientsInfo.get(count).getAddress() + String.valueOf(clientsInfo.get(count).getPort()))) {
-					  clientsInfo.get(count).setJoined(false);
-				  }
-				  else {
-					  clientsInfo.get(count).setJoined(true);
-				  }
-				  ChatClient.participantsInfo.add(clientsInfo.get(count));
-				  ChatClient.currentParticipants.add(clientsInfo.get(count).getAddress() + String.valueOf(clientsInfo.get(count).getPort()));
-			  }
-		  }
-
-		  for (int count = 1; count < ChatClient.participantsInfo.size(); count++) {
-
-			  if(ChatClient.participantsInfo.get(count).getJoined() == false) {
-				  (ChatClient.sender[count] = new Sender("LEAVE " + ChatClient.participantsInfo.get(count).getAddress() + " " + String.valueOf(ChatClient.participantsInfo.get(count).getPort()), count)).start();
-				  try {
-					  Thread.sleep(2);
-				  } catch (InterruptedException e) {
-					  // TODO Auto-generated catch block
-					  e.printStackTrace();
-				  }
-				  ChatClient.participantsInfo.get(count).setJoined(true);
-			  }
-		  }
-
+		  NodeInfo leavingClient = (NodeInfo) message.getContent();
+		  System.out.println(leavingClient.getName() + " left chat");
+		  ChatClient.currentParticipants.remove(leavingClient);
+		  ChatClient.visitedParticipant.remove(leavingClient);
 		  break;
 
-      case SHUTDOWN:
-        System.out.println("Received shutdown message from server, exiting");
 
-        try {
-          serverConnection.close();
-        } catch (IOException ex) {
-          // dont care
-        }
+	  case SHUTDOWN_ALL:
+		  NodeInfo shutdownClient = (NodeInfo) message.getContent();
+		  System.out.println("Received shutdown message from " + shutdownClient.getName() +", exiting");
 
-        System.exit(0);
+		  try {
+			  serverConnection.close();
+		  } catch (IOException ex) {
+			  // dont care
+		  }
 
-        break;
-
+		  System.exit(0);
+		  break;
       case NOTE:
 
         System.out.println((String) message.getContent());
