@@ -1,1 +1,5 @@
 /bin/
+/P3/TransactionServerLocking/target/
+/P3/TransactionServerLocking/nbproject/private/
+/P3/TransactionServerLocking/build/
+/P3/TransactionServer OCC/nbproject/private/
