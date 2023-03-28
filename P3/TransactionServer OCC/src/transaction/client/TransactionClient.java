@@ -10,9 +10,21 @@ package transaction.client;
  */
 public class TransactionClient {
 
-    /**
-     * @param args the command line arguments
-     */
+    // create the sender and receiver variables
+    
+    // client constructor
+    public TransactionClient(String propertiesFile) {
+        // get the properties file
+        
+    }
+    
+    public void run() {
+        // start receiver and sender
+        
+        // create the proxy server
+        
+    }
+    
     public static void main(String[] args) {
         // TODO code application logic here
     }
