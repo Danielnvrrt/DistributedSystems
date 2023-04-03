@@ -156,7 +156,7 @@ public class TransactionManager implements MessageTypes {
         // constructor to open up the network channels
         private TransactionManagerWorker(Socket client) {
             // set up object streams
-            thid.clinet = client;
+            this.client = client;
             
             try {
                 readFromNet = new ObjectInputStream(client.getInputStream());

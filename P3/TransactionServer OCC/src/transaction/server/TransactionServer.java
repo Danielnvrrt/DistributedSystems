@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import transaction.server.transaction.TransactionManager;
 /**
  *
  * @author Daniel
@@ -19,6 +20,14 @@ public class TransactionServer {
     
     // Transaction Server constructor, initialize the server socket
     public TransactionServer(String serverIP, int serverPort) {
+        this.serverIP = serverIP;
+        this.serverPort = serverPort;
+        try {
+            this.server = new ServerSocket(this.serverPort);
+        }
+        catch (IOException ex) {
+            System.exit(1);
+        }
         
     }
 
@@ -26,7 +35,9 @@ public class TransactionServer {
     public void run() throws IOException {
         while(true)
         {
-            new TransactionManager(server.accept()).start();
+            // Do we create a new transactionManager every time?
+            System.out.prnintln("Hi");
+            new TransactionManager().runTransaction(server.accept());
         }
     }
     
@@ -34,6 +45,13 @@ public class TransactionServer {
     // with the values taken from the configuration file 
     public static void main(String[] args) {
         // TODO code application logic here
+        try{
+            new TransactionServer("10.21.41.190", 801).run();
+        }
+        catch (IOException ex) {
+            System.exit(1);
+        }
+        
     }
     
 }

@@ -1,3 +1,5 @@
+package transaction.client;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -5,7 +7,7 @@ import java.net.Socket;
 import transaction.comm.Message;
 import transaction.comm.MessageTypes;
 
-package transaction.client;
+
 
 /**
  *
@@ -36,9 +38,11 @@ public class TransactionServerProxy implements MessageTypes {
         // this is where we will create the transaction
         // that will start a connection and also record the message
         try {
-            dbConnection = new Socket(host, port);
-            writeToNet = new PbjectOutputStream(dbConnection.getOutputStream());
+            System.out.println(host + port);
+            dbConnection = new Socket(host, port);            
+            writeToNet = new ObjectOutputStream(dbConnection.getOutputStream());
             readFromNet = new ObjectInputStream(dbConnection.getInputStream());
+            
         } catch (IOException ex) {
             System.out.println("[TransactionServerProxy.openTransaction] Error occured when opening object streams");
             ex.printStackTrace();
@@ -55,7 +59,7 @@ public class TransactionServerProxy implements MessageTypes {
         // the transaction will return the transaction id
         return transactionID;
     }
-    
+    /*
     // closes a transaction
     // it will request this transaction to close
     public int closeTransaction() {
@@ -120,5 +124,5 @@ public class TransactionServerProxy implements MessageTypes {
         if (message.getType() == TRANSACTION_ABORTED) {
             throw new TransactionAbortedException();
         }
-    }
+    }*/
 }

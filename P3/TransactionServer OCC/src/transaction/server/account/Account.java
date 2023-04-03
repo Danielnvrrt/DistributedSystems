@@ -40,11 +40,11 @@ public class Account {
     }
     
     public int getAccountID(){
-        
+        return accountID;
     }
     
     public int getAccountBalance(accountID) {
-        
+        return accountBalance;
     }
     
     
