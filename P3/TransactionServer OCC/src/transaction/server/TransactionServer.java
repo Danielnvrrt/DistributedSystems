@@ -19,11 +19,21 @@ public class TransactionServer {
 
     
     // Transaction Server constructor, initialize the server socket
-    public TransactionServer(String serverIP, int serverPort) {
+    public TransactionServer(String propertiesFile) {
+        
+        Properties p = new Properties();
+        try {
+            p.load(new FileReader(propertiesFile));
+        }
+        catch (IOException ex){
+            System.exit(1);
+        }
+        
+        System.out.println(p.getProperty("N_ACCOUNTS"));
         this.serverIP = serverIP;
         this.serverPort = serverPort;
         try {
-            this.server = new ServerSocket(this.serverPort);
+            this.serverPort = Integer(p.getProperty("PORT"));
         }
         catch (IOException ex) {
             System.exit(1);
@@ -36,7 +46,7 @@ public class TransactionServer {
         while(true)
         {
             // Do we create a new transactionManager every time?
-            System.out.prnintln("Hi");
+            
             new TransactionManager().runTransaction(server.accept());
         }
     }
@@ -46,9 +56,10 @@ public class TransactionServer {
     public static void main(String[] args) {
         // TODO code application logic here
         try{
-            new TransactionServer("10.21.41.190", 801).run();
+            //new TransactionServer("10.21.41.190", 801).run();
+            TransactionServer x = new TransactionServer("config/serverPropertiesFile.properties");
         }
-        catch (IOException ex) {
+        catch (RuntimeException ex) {
             System.exit(1);
         }
         

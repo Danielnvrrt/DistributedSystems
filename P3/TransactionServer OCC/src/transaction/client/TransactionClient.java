@@ -13,7 +13,7 @@ import java.util.Properties;
  *
  * @author Brian
  */
-public class TransactionClient {
+public class TransactionClient extends Thread {
     String host = null;
     int port;
     // create the sender and receiver variables
@@ -49,7 +49,6 @@ public class TransactionClient {
 	}
 	// create the node info for the Client
         this.host = NetworkUtilities.getMyIP();
-        System.out.println("hola");
         this.proxy = new TransactionServerProxy(this.host, this.port);
         
     }
