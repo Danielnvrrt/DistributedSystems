@@ -98,12 +98,17 @@ public class Satellite extends Thread {
 		}
     	
     	classLoader = new HTTPClassLoader(properties.getProperty("HOST"), Integer.parseInt(properties.getProperty("PORT")));
-
+        if (classLoader != null) {
+            System.err.println("[Satellite.Satellite] HTTPClassLoader created on " + satelliteInfo.getName());
+        } else {
+            System.err.println("[Satellite.Satellite] Could not create HTTPClassLoader, exiting ...");
+            System.exit(1);
+        }
         
         // create tools cache
         // -------------------
         // ...
-        
+        toolsCache = new Hashtable();
     }
 
     @Override
@@ -177,7 +182,7 @@ public class Satellite extends Thread {
             
             // reading message
             // ...
-            System.out.println((String) message.getContent());
+            //System.out.println((String) message.getContent());
             
             switch (message.getType()) {
                 case JOB_REQUEST:
