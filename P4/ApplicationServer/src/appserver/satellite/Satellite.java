@@ -3,12 +3,10 @@ package appserver.satellite;
 import appserver.job.Job;
 import appserver.comm.ConnectivityInfo;
 import appserver.job.UnknownToolException;
-import appserver.server.SatelliteManager;
 import appserver.comm.Message;
 import static appserver.comm.MessageTypes.JOB_REQUEST;
-import static appserver.comm.MessageTypes.REGISTER_SATELLITE;
+//import static appserver.comm.MessageTypes.REGISTER_SATELLITE;
 import appserver.job.Tool;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -17,6 +15,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.*;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -44,17 +44,26 @@ public class Satellite extends Thread {
         // ...
     	Properties properties = null;
     	try {
-			properties = new PropertyHandler(satellitePropertiesFile);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+            properties = new PropertyHandler(satellitePropertiesFile);
+	} catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+	} catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     	// System.out.println(properties);
     	satelliteInfo.setPort(Integer.parseInt(properties.getProperty("PORT")));
     	satelliteInfo.setName(properties.getProperty("NAME"));
+        String localIpAddress = null;
+        try {
+            // get local IP addres
+            InetAddress localhost = InetAddress.getLocalHost();
+            localIpAddress = localhost.getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        satelliteInfo.setHost(localIpAddress);
         
         
         // read properties of the application server and populate serverInfo object
@@ -73,6 +82,7 @@ public class Satellite extends Thread {
     	serverInfo.setPort(Integer.parseInt(properties.getProperty("PORT")));
     	serverInfo.setHost(properties.getProperty("HOST"));
         
+
         
         // read properties of the code server and create class loader
         // -------------------
@@ -93,7 +103,6 @@ public class Satellite extends Thread {
         // create tools cache
         // -------------------
         // ...
-    	
         
     }
 
@@ -102,32 +111,30 @@ public class Satellite extends Thread {
 
 		// register this satellite with the SatelliteManager on the server
         // ---------------------------------------------------------------
-        // ...
-    	SatelliteManager satelliteManager = new SatelliteManager();
-    	satelliteManager.registerSatellite(satelliteInfo);
+        // ... 	
         
         
         // create server socket
         // ---------------------------------------------------------------
         // ...
-    	Socket serversocket = null;
+    	ServerSocket serverSocket = null;
     	try {
-			serversocket = new Socket(satelliteInfo.getHost(), satelliteInfo.getPort());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
+            serverSocket = new ServerSocket(satelliteInfo.getPort());
+	} catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+	}        
         
         // start taking job requests in a server loop
         // ---------------------------------------------------------------
         // ...
     	while(true) {
-			String satellitePropertiesFile = "C:\\Users\\user\\Downloads\\Application Server Skeleton\\config\\Satellite.Earth.properties";
-    		String classLoaderPropertiesFile = "C:\\Users\\user\\Downloads\\Application Server Skeleton\\config\\WebServer.properties";
-    		String serverPropertiesFile = "C:\\Users\\user\\Downloads\\Application Server Skeleton\\config\\Server.properties";
-    		Satellite satellite = new Satellite(satellitePropertiesFile, classLoaderPropertiesFile, serverPropertiesFile);
-			SatelliteThread satellitethread = new SatelliteThread(serversocket, satellite);
+            try{
+                (new SatelliteThread(serverSocket.accept(), this)).start();
+            }catch (IOException ex){
+                System.err.println("[Server.Server] Warning: Error accepting client");
+            } 
+            
     	}
     	
     }
@@ -144,17 +151,21 @@ public class Satellite extends Thread {
         SatelliteThread(Socket jobRequest, Satellite satellite) {
             this.jobRequest = jobRequest;
             this.satellite = satellite;
+            System.out.println("Hello everyone");
         }
-
+        
         @Override
         public void run() {
             // setting up object streams
             // ...
         	ObjectInputStream readFromNet = null;
-    		Integer result = null;
+                ObjectOutputStream writeToNet = null;
+                Message message = null;
 			try {
-				readFromNet = new ObjectInputStream(jobRequest.getInputStream());
-				result = (Integer) readFromNet.readObject();
+                            readFromNet = new ObjectInputStream(jobRequest.getInputStream());
+                            writeToNet = new ObjectOutputStream(jobRequest.getOutputStream());
+                            message = (Message) readFromNet.readObject();
+                            jobRequest.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -166,13 +177,39 @@ public class Satellite extends Thread {
             
             // reading message
             // ...
-			System.out.println(result);
+            System.out.println((String) message.getContent());
             
             switch (message.getType()) {
                 case JOB_REQUEST:
                     // processing job request
                     // ...
-                	System.out.println("Job has been processed");
+                    Job job = (Job) message.getContent();
+                    String classString = job.getToolName();
+                    Object arguments = job.getParameters();
+
+                    //get tool object
+                    Tool tool = null;
+                    try {
+                        tool = satellite.getToolObject(classString);
+                    } catch (UnknownToolException | NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException ex) {
+                        System.err.println("[SatelliteThread.run] Error occured when retrieving class");
+                        try {
+                            readFromNet.close();
+                            writeToNet.close();
+                            System.err.println("... closing streams and returning");
+                            return;
+                            } catch (IOException ex1) {
+                                System.err.println("[SatelliteThread.run] Error closing object streams");
+                            }
+                      }
+
+                    Object result = tool.go(arguments);
+                    try {
+                        writeToNet.writeObject(result);
+                    } catch (IOException ex) {
+                        System.err.println("[SatelliteThread.run] Error when writing object to output stream");
+                    }
+
                     break;
 
                 default:
@@ -186,11 +223,39 @@ public class Satellite extends Thread {
      * If the tool has been used before, it is returned immediately out of the cache,
      * otherwise it is loaded dynamically
      */
-    public Tool getToolObject(String toolClassString) throws UnknownToolException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public Tool getToolObject(String toolClassString) throws UnknownToolException, SecurityException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, InstantiationException{
 
         Tool toolObject = null;
-
-        // ...
+        Class<?> toolClass = null;
+        
+        if ((toolObject = (Tool) toolsCache.get(toolClassString)) == null){
+            try{
+                toolClass = classLoader.loadClass(toolClassString);
+            } catch (ClassNotFoundException ex){
+                Logger.getLogger(Satellite.class.getName()).log(Level.SEVERE, null, ex);
+                throw new UnknownToolException();
+            }
+            
+            try{
+                toolObject = (Tool) toolClass.getDeclaredConstructor().newInstance();
+            }catch (InstantiationException ex){
+                Logger.getLogger(Satellite.class.getName()).log(Level.SEVERE, null, ex);
+            }catch (IllegalAccessException ex) {
+                Logger.getLogger(Satellite.class.getName()).log(Level.SEVERE, null, ex);          
+            }catch (NoSuchMethodException ex) {
+                Logger.getLogger(Satellite.class.getName()).log(Level.SEVERE, null, ex);
+            }catch (SecurityException ex) {
+                Logger.getLogger(Satellite.class.getName()).log(Level.SEVERE, null, ex);
+            }catch (InvocationTargetException ex) {
+                Logger.getLogger(Satellite.class.getName()).log(Level.SEVERE, null, ex);
+                System.err.println("[DynCalculator] getOperation() - InvocationTargetException");                
+            }
+            
+            // put the tool into cache
+            toolsCache.put(toolClassString, toolObject);
+        } else {
+            System.out.println("[Satellite.getToolObject] Tool: \"" + toolClassString + "\" already in Cache");
+        }
         
         return toolObject;
     }
@@ -200,12 +265,7 @@ public class Satellite extends Thread {
     	Satellite satellite = null;
     	if(args.length > 0) {
     		satellite = new Satellite(args[0], args[1], args[2]);
-    	} else {
-    		String satellitePropertiesFile = "C:\\Users\\user\\Downloads\\Application Server Skeleton\\config\\Satellite.Earth.properties";
-    		String classLoaderPropertiesFile = "C:\\Users\\user\\Downloads\\Application Server Skeleton\\config\\WebServer.properties";
-    		String serverPropertiesFile = "C:\\Users\\user\\Downloads\\Application Server Skeleton\\config\\Server.properties";
-    		satellite = new Satellite(satellitePropertiesFile, classLoaderPropertiesFile, serverPropertiesFile);
-    	}
+    	} 
         satellite.run();
     }
 }
