@@ -170,7 +170,6 @@ public class Satellite extends Thread {
                             readFromNet = new ObjectInputStream(jobRequest.getInputStream());
                             writeToNet = new ObjectOutputStream(jobRequest.getOutputStream());
                             message = (Message) readFromNet.readObject();
-                            jobRequest.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -215,6 +214,12 @@ public class Satellite extends Thread {
                         System.err.println("[SatelliteThread.run] Error when writing object to output stream");
                     }
 
+			try {
+                    	jobRequest.close();
+                    } catch (IOException e) {
+                    	// TODO Auto-generated catch block
+                    	e.printStackTrace();
+                    }
                     break;
 
                 default:
