@@ -70,7 +70,7 @@ public class Satellite extends Thread {
         // other than satellites, the as doesn't have a human-readable name, so leave it out
         // ...
     	try {
-			properties = new PropertyHandler(serverPropertiesFile);
+			properties = new PropertyHandler(classLoaderPropertiesFile);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -187,6 +187,15 @@ public class Satellite extends Thread {
                 case JOB_REQUEST:
                     // processing job request
                     // ...
+			try {
+                		Socket socket = new Socket("127.0.0.1", serverInfo.getPort());
+                	} catch (UnknownHostException e1) {
+                		// TODO Auto-generated catch block
+                		e1.printStackTrace();
+                	} catch (IOException e1) {
+                		// TODO Auto-generated catch block
+                		e1.printStackTrace();
+                	}
                     Job job = (Job) message.getContent();
                     String classString = job.getToolName();
                     Object arguments = job.getParameters();
