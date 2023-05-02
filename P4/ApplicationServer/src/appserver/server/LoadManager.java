@@ -18,19 +18,26 @@ public class LoadManager {
     public void satelliteAdded(String satelliteName) {
         // add satellite
         // ...
+        if (!satellites.contains(satelliteName)){
+            satellites.add(satelliteName);
+        }
+        else {
+            System.out.println("[Server.LoadManager]: " + satelliteName + " already in the list");
+        }
     }
 
 
     public String nextSatellite() throws Exception {
         
-        int numberSatellites;
-        
+        int numberSatellites = satellites.size();
+        String name = null;
         synchronized (satellites) {
             // implement policy that returns the satellite name according to a round robin methodology
             // ...
+            lastSatelliteIndex = (lastSatelliteIndex + 1) % numberSatellites;
+            name = satellites.get(lastSatelliteIndex).toString();
         }
 
-        return // ... name of satellite who is supposed to take job
-        ;
+        return name;// ... name of satellite who is supposed to take job        
     }
 }
