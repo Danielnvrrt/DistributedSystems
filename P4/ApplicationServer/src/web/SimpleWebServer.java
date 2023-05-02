@@ -1,6 +1,6 @@
 package web;
 
-import appserver.client.PlusOneClient;
+import appserver.client.plusone.PlusOneClient;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;

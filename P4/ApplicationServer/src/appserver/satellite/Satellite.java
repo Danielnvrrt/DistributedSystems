@@ -5,7 +5,7 @@ import appserver.comm.ConnectivityInfo;
 import appserver.job.UnknownToolException;
 import appserver.comm.Message;
 import static appserver.comm.MessageTypes.JOB_REQUEST;
-//import static appserver.comm.MessageTypes.REGISTER_SATELLITE;
+import static appserver.comm.MessageTypes.REGISTER_SATELLITE;
 import appserver.job.Tool;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -156,7 +156,6 @@ public class Satellite extends Thread {
         SatelliteThread(Socket jobRequest, Satellite satellite) {
             this.jobRequest = jobRequest;
             this.satellite = satellite;
-            System.out.println("Hello everyone");
         }
         
         @Override

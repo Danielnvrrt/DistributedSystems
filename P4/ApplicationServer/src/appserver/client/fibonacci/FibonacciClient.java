@@ -1,4 +1,4 @@
-package appserver.client.plusone;
+package appserver.client.fibonacci;
 
 import appserver.comm.Message;
 import appserver.comm.MessageTypes;
@@ -11,43 +11,46 @@ import java.util.Properties;
 import utils.PropertyHandler;
 
 /**
- * Class [PlusOneClient] A primitive POC client that uses the PlusOne tool
- * 
- * @author Dr.-Ing. Wolf-Dieter Otte
+ *
+ * @author Usuario
  */
-public class PlusOneClient implements MessageTypes{
+public class FibonacciClient extends Thread implements MessageTypes{
     
     String host = null;
     int port;
-
+    int argument;
+    
     Properties properties;
-
-    public PlusOneClient(String serverPropertiesFile) {
+    
+    public FibonacciClient(String serverPropertiesFile, int argument) {
+        this.argument = argument;
+        
         try {
             properties = new PropertyHandler(serverPropertiesFile);
             host = properties.getProperty("HOST");
-            System.out.println("[PlusOneClient.PlusOneClient] Host: " + host);
+            System.out.println("[FibonacciClient.FibonacciClient] Host: " + host);
             port = Integer.parseInt(properties.getProperty("PORT"));
-            System.out.println("[PlusOneClient.PlusOneClient] Port: " + port);
+            System.out.println("[FibonacciClient.FibonacciClient] Port: " + port);            
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        
     }
     
     public void run() {
-        try { 
+        try {
             // connect to application server
             Socket server = new Socket(host, port);
             
             // hard-coded string of class, aka tool name ... plus one argument
-            String classString = "appserver.job.impl.PlusOne";
-            Integer number = new Integer(42);
+            String classString = "appserver.job.impl.fibonacci.Fibonacci";
+            Integer number = argument;
             
             // create job and job request message
             Job job = new Job(classString, number);
             Message message = new Message(JOB_REQUEST, job);
             
-            // sending job out to the application server in a message
+            // sending hob out to the application server in a message
             ObjectOutputStream writeToNet = new ObjectOutputStream(server.getOutputStream());
             writeToNet.writeObject(message);
             
@@ -55,21 +58,16 @@ public class PlusOneClient implements MessageTypes{
             // for simplicity, the result is not encapsulated in a message
             ObjectInputStream readFromNet = new ObjectInputStream(server.getInputStream());
             Integer result = (Integer) readFromNet.readObject();
-            System.out.println("RESULT: " + result);
-        } catch (Exception ex) {
-            System.err.println("[PlusOneClient.run] Error occurred");
+            System.out.println("Fibonacci of " + argument + ": " + result);
+        } catch (Exception ex){
+            System.err.println("[FibonacciClient.run] Error occurred");
             ex.printStackTrace();
         }
     }
-
+    
     public static void main(String[] args) {
-        
-        PlusOneClient client = null;
-        if(args.length == 1) {
-            client = new PlusOneClient(args[0]);
-        } else {
-            client = new PlusOneClient("../../config/Server.properties");
-        }
-        client.run();
-    }  
+        for (int i = 46; i > 0; i--){
+            (new FibonacciClient("../../config/Server.properties", i)).start();
+        }            
+    }           
 }
