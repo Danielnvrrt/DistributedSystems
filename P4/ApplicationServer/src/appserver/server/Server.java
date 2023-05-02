@@ -7,6 +7,7 @@ import appserver.comm.ConnectivityInfo;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.FileNotFoundException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
@@ -27,15 +28,37 @@ public class Server {
 
         // create satellite manager and load manager
         // ...
-        
+        satelliteManager = new SatelliteManager();
+        loadManager = new LoadManager();
         // read server properties and create server socket
         // ...
+        Properties properties = null;
+        try {
+            properties = new PropertyHandler(serverPropertiesFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }   
+        int port = Integer.parseInt(properties.getProperty("PORT"));
+        try {
+            serverSocket = new ServerSocket(port);
+	} catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+	}  
     }
 
     public void run() {
     // serve clients in server loop ...
     // when a request comes in, a ServerThread object is spawned
     // ...
+        while(true) {
+            Socket client = serverSocket.accept();
+            ServerThread serverThread = new ServerThread(client);
+            // Do we have to start it in a new thread?
+            serverThread.start();
+        }
     }
 
     // objects of this helper class communicate with satellites or clients
