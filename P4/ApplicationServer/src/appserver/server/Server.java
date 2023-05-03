@@ -77,6 +77,20 @@ public class Server {
         public void run() {
             // set up object streams and read message
             // ...
+		ObjectInputStream readFromNet = null;
+                ObjectOutputStream writeToNet = null;
+                Message message = null;
+			try {
+                            readFromNet = new ObjectInputStream(client.getInputStream());
+                            writeToNet = new ObjectOutputStream(client.getOutputStream());
+                            message = (Message) readFromNet.readObject();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
             
             // process message
@@ -84,34 +98,40 @@ public class Server {
                 case REGISTER_SATELLITE:
                     // read satellite info
                     // ...
+			System.out.println(message.getContent());
                     
                     // register satellite
                     synchronized (Server.satelliteManager) {
                         // ...
+			    Server.satelliteManager.registerSatellite(message.getContent());
                     }
 
                     // add satellite to loadManager
                     synchronized (Server.loadManager) {
                         // ...
+			    Server.loadManager.satelliteAdded(message.getContent());
                     }
 
                     break;
 
                 case JOB_REQUEST:
                     System.err.println("\n[ServerThread.run] Received job request");
-
                     String satelliteName = null;
+			 ConnectivityInfo satelliteConInfo = null;
                     synchronized (Server.loadManager) {
                         // get next satellite from load manager
                         // ...
+			    satelliteName = Server.loadManager.nextSatellite();
                         
                         // get connectivity info for next satellite from satellite manager
                         // ...
+			    satelliteConInfo = Server.satelliteManager.getSatelliteForName(satelliteName);
                     }
 
                     Socket satellite = null;
                     // connect to satellite
                     // ...
+			satellite = new Socket(satelliteConInfo.getHost(), satelliteConInfo.getPort());
 
                     // open object streams,
                     // forward message (as is) to satellite,
