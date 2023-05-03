@@ -116,7 +116,8 @@ public class Satellite extends Thread {
 
 		// register this satellite with the SatelliteManager on the server
         // ---------------------------------------------------------------
-        // ... 	
+        // ...
+	    Server.SatelliteManager.registerSatellite(this.satelliteInfo);
         
         
         // create server socket
