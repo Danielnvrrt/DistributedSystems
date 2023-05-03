@@ -138,6 +138,16 @@ public class Server {
                     // receive result from satellite and
                     // write result back to client
                     // ...
+			ObjectOutputStream writeToNet = new ObjectOutputStream(satellite.getOutputStream());
+            		writeToNet.writeObject(message);
+            
+            		
+            		ObjectInputStream readFromNet = new ObjectInputStream(satellite.getInputStream());
+            		Integer result = (Integer) readFromNet.readObject();
+            		System.out.println("RESULT: " + result);
+			    
+			ObjectOutputStream writeToNet = new ObjectOutputStream(client.getOutputStream());
+            		writeToNet.writeObject(readFromNet.readObject());
 
                     break;
 
